@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Three.js Відео Текстура</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; color: white; font-family: sans-serif; text-align: center; }
+        body { margin: 0; overflow: hidden; background-color: #222; color: white; font-family: sans-serif; text-align: center; }
         #info { position: absolute; top: 15px; width: 100%; z-index: 100; pointer-events: none; }
         a { color: #00ffcc; pointer-events: auto; text-decoration: none; font-weight: bold; }
         a:hover { text-decoration: underline; }
@@ -16,8 +16,8 @@
         <em>Натисніть у будь-якому місці екрана, щоб запустити відео</em>
     </div>
 
-    <video id="video" loop muted autoplay crossOrigin="anonymous" playsinline style="display:none">
-        <source src="video.mp4" type="video/mp4">
+    <video id="video" loop muted autoplay playsinline crossOrigin="anonymous" style="display:none">
+        <source src="https://threejs.org/examples/textures/sintel.mp4" type="video/mp4">
     </video>
 
     <script type="module">
@@ -29,34 +29,33 @@
         animate();
 
         function init() {
-            // Налаштування камери
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
             camera.position.z = 5;
 
-            // Створення сцени
             scene = new THREE.Scene();
+            // Робимо фон сірим, щоб куб не зливався
+            scene.background = new THREE.Color(0x444444); 
 
-            // Отримання відео
             video = document.getElementById('video');
             
-            // Сучасні браузери блокують автовідтворення відео зі звуком, тому запускаємо по кліку
             document.body.addEventListener('click', () => {
                 video.play();
             });
 
-            // Створення відео-текстури
             const texture = new THREE.VideoTexture(video);
             texture.colorSpace = THREE.SRGBColorSpace;
 
-            // Створення геометрії та матеріалу
             const geometry = new THREE.BoxGeometry(3, 2, 3);
-            const material = new THREE.MeshBasicMaterial({ map: texture });
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff, map: texture });
 
-            // Додавання об'єкта на сцену
             const mesh = new THREE.Mesh(geometry, material);
             scene.add(mesh);
 
-            // Налаштування рендерера
+            // Додаємо неонову зелену рамку навколо куба
+            const edges = new THREE.EdgesGeometry(geometry);
+            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x00ff00 }));
+            mesh.add(line);
+
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth, window.innerHeight);
@@ -73,7 +72,6 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            // Обертання об'єкта
             scene.children[0].rotation.x += 0.005;
             scene.children[0].rotation.y += 0.01;
             renderer.render(scene, camera);
